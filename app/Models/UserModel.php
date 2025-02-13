@@ -34,16 +34,16 @@ class UserModel extends Model
                     ->first();
     }
 
-    public function getUsers($keyword='')
+    public function getUsers($keyword='', $maxRows)
     {
-        $joinTable = $this->db->table('user_role')
-                            ->select('user.id, name, email, image, role, role_id, is_active, created_at, updated_at')
-                            ->join('user', 'user_role.id=user.role_id');
+        $joinTable = $this->select('user.id, name, email, image, role, role_id, is_active, created_at, updated_at')
+                            ->join('user_role', 'user_role.id=user.role_id');
         if ($keyword){
             $joinTable = $joinTable
                         ->like('name', "%$keyword%")
                         ->orLike('email', "%$keyword%");
         }
-        return $joinTable->get()->getResultArray();
+
+        return $joinTable->paginate($maxRows, 'user');
     }
 }

@@ -121,16 +121,23 @@ class Admin extends BaseController
     public function userManagement()
     {
         $keyword = $this->request->getVar('keyword');
+        $maxRows = $this->request->getVar('maxRows'); // Ensure this matches the AJAX request
         
+        $maxRows = ($maxRows) ?: 2;
+
+        $currentPage = $this->request->getVar('page_user') ?: 1;
+
         $data = [
             'title' => 'User',
             'menu' => $this->menu,
             'user' => $this->dataUser,
             'roles' => $this->roleModel->findAll(),
-            'users' => $this->userModel->getUsers($keyword),
-            'keyword' => ($keyword) ?: ''
+            'users' => $this->userModel->getUsers($keyword, $maxRows),
+            'maxRows' => $maxRows,
+            'keyword' => ($keyword) ?: '',
+            'pager' => $this->userModel->pager,
+            'currentPage' => $currentPage
         ];
-        
         return view('admin/usermanagement', $data);
     }
     
@@ -159,5 +166,15 @@ class Admin extends BaseController
         $this->userModel->save($data);
         
         self::flash('warning', 'User activation has been changed');
+    }
+
+    public function coba (){
+        $keyword = $this->request->getPost('keyword');
+        $maxRows = $this->request->getPost('max-rows');
+        $kata = $this->request->getPost('asu');
+
+        d($kata);
+        d($keyword);
+        d($maxRows);
     }
 }

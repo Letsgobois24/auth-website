@@ -11,8 +11,9 @@
 
         <div class="row mb-3">
             <div class="col-12 col-sm-6">
-                <form method="get" action="<?= base_url('admin/usermanagement') ?>" class="d-flex" role="search">
+                <form method="post" action="<?= base_url('admin/usermanagement') ?>" class="d-flex" role="search">
                     <input class="form-control" name="keyword" type="search" placeholder="Search" aria-label="Search" value="<?= $keyword ?>">
+                    <input type="hidden" name="max-rows" value="<?= $maxRows ?>">
                     <button class="btn btn-outline-info" type="submit">
                         <i class="align-middle" data-feather="search"></i>
                     </button>
@@ -21,32 +22,14 @@
         </div>
 
         <div class="row mb-3 d-flex justify-content-between">
-            <div class="col-12 col-sm-4">
-                <ul class="pagination pagination-sm">
-                    <li class="page-item">
-                        <a class="page-link" href="#" aria-label="Previous">
-                            <span aria-hidden="true">&laquo;</span>
-                        </a>
-                    </li>
-                    <li class="page-item"><a class="page-link" href="#">1</a></li>
-                    <li class="page-item"><a class="page-link" href="#">2</a></li>
-                    <li class="page-item"><a class="page-link" href="#">3</a></li>
-                    <li class="page-item">
-                        <a class="page-link" href="#" aria-label="Next">
-                            <span aria-hidden="true">&raquo;</span>
-                        </a>
-                    </li>
-                </ul>
-            </div>
-
             <div class="col-12 col-sm-2 d-flex align-items-center">
-                <label for="maxRows" class="me-2">Rows</label>
-                <select class="form-select" name="maxRows" id="maxRows">
+                <label for="max-rows" class="me-2">Rows</label>
+                <select class="form-select max-rows-select" name="max-rows" id="max-rows">
+                    <option value="2">2</option>
                     <option value="5">5</option>
                     <option value="10">10</option>
                     <option value="20">20</option>
                     <option value="50">50</option>
-                    <option value="100">100</option>
                 </select>
             </div>
         </div>
@@ -65,7 +48,7 @@
                             <th class="d-none d-xl-table-cell">Updated At</th>
                         </tr>
                     </thead>
-                    <?php $i = 1 ?>
+                    <?php $i = $currentPage * $maxRows - 1 ?>
                     <tbody>
                         <?php foreach ($users as $user) : ?>
                             <tr>
@@ -73,7 +56,7 @@
                                 <td><?= $user['name'] ?></td>
                                 <td class="d-none d-xl-table-cell"><?= $user['email'] ?></td>
                                 <td>
-                                    <select class="form-select" id="role_id" name="role_id" data-id="<?= $user['id'] ?>">
+                                    <select class="form-select role-select" id="role_id" name="role_id" data-id="<?= $user['id'] ?>">
                                         <?php foreach ($roles as $role) : ?>
                                             <option <?= selected_option($role['role'], $user['role']) ?> value="<?= $role['id'] ?>">
                                                 <?= $role['role'] ?>
@@ -82,7 +65,7 @@
                                     </select>
                                 </td>
                                 <td>
-                                    <input class="form-check-input" type="checkbox" value="1" <?= ($user['is_active'] == 1) ? 'checked' : ''  ?> data-id="<?= $user['id'] ?>">
+                                <input class="form-check-input" type="checkbox" value="1" <?= ($user['is_active'] == 1) ? 'checked' : ''  ?> data-id="<?= $user['id'] ?>">
                                 </td>
                                 <td class="d-none d-xl-table-cell"><?= time_parsing($user['created_at']) ?></td>
                                 <td class="d-none d-xl-table-cell"><?= time_parsing($user['updated_at']) ?></td>
@@ -90,6 +73,7 @@
                         <?php endforeach ?>
                     </tbody>
                 </table>
+                <?= $pager->links('user', 'user_pagination') ?>
             </div>
         </div>
 
@@ -98,7 +82,30 @@
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-    $('.form-check-input').on('click', function() {
+    
+    $('#max-rows').val(<?= $maxRows ?>);
+    
+    $('#max-rows').on('change', function() {
+        const maxRows = $(this).val();
+        const keyword = $('input[name="keyword"]').val();
+
+        $.ajax({
+            url: "<?= base_url('admin/usermanagement') ?>",
+            type: "get",
+            data: {
+                maxRows: maxRows,
+                keyword: keyword
+            },
+            
+            success: function(response) {
+                window.location.reload();
+            },
+            
+        })
+
+    })
+
+    $('.form-check-input').on('change', function() {
         const id = $(this).data('id');
         const checked = $(this).is(':checked');
 
@@ -110,12 +117,12 @@
                 checked: checked
             },
             success: function() {
-                document.location.href = "<?= base_url('admin/usermanagement') ?>"
+                window.location.reload();
             }
         })
     })
 
-    $('.form-select').on('change', function() {
+    $('.role-select').on('change', function() {
         const selectedOption = $(this).val();
         const id = $(this).data('id');
 
@@ -128,7 +135,7 @@
                     role_id: selectedOption
                 },
                 success: function() {
-                    document.location.href = "<?= base_url('admin/usermanagement') ?>";
+                    window.location.reload();
                 }
             });
         }
