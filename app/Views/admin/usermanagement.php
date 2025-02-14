@@ -11,9 +11,9 @@
 
         <div class="row mb-3">
             <div class="col-12 col-sm-6">
-                <form method="post" action="<?= base_url('admin/usermanagement') ?>" class="d-flex" role="search">
+                <form method="get" action="<?= base_url('admin/usermanagement') ?>" class="d-flex" role="search">
                     <input class="form-control" name="keyword" type="search" placeholder="Search" aria-label="Search" value="<?= $keyword ?>">
-                    <input type="hidden" name="max-rows" value="<?= $maxRows ?>">
+                    
                     <button class="btn btn-outline-info" type="submit">
                         <i class="align-middle" data-feather="search"></i>
                     </button>

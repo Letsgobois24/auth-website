@@ -121,7 +121,7 @@ class Admin extends BaseController
     public function userManagement()
     {
         $keyword = $this->request->getVar('keyword');
-        $maxRows = $this->request->getVar('maxRows'); // Ensure this matches the AJAX request
+        $maxRows = $this->request->getVar('maxRows');
         
         $maxRows = ($maxRows) ?: 2;
 

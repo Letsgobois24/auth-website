@@ -44,3 +44,5 @@ $routes->group('/menu', static function ($routes){
     $routes->delete('(:num)', 'Menu::deleteMenu/$1');
     $routes->delete('submenu/delete/(:num)', 'Menu::deleteSubmenu/$1');
 });
+
+$routes->get('ajax/search', 'AjaxController::search');
