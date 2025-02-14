@@ -11,9 +11,9 @@
 
         <div class="row mb-3">
             <div class="col-12 col-sm-6">
-                <form method="get" action="<?= base_url('admin/usermanagement') ?>" class="d-flex" role="search">
+                <form id="search-form" class="d-flex" role="search">
                     <input class="form-control" name="keyword" type="search" placeholder="Search" aria-label="Search" value="<?= $keyword ?>">
-                    
+
                     <button class="btn btn-outline-info" type="submit">
                         <i class="align-middle" data-feather="search"></i>
                     </button>
@@ -36,7 +36,7 @@
 
         <div class="col-12 col-lg col-xxl-9 d-flex">
             <div class="card flex-fill">
-                <table class="table table-hover my-0">
+                <table class="table table-hover my-0" id="user-table">
                     <thead>
                         <tr>
                             <th>No</th>
@@ -48,7 +48,7 @@
                             <th class="d-none d-xl-table-cell">Updated At</th>
                         </tr>
                     </thead>
-                    <?php $i = $currentPage * $maxRows - 1 ?>
+                    <?php $i = $maxRows * ($currentPage  - 1) + 1 ?>
                     <tbody>
                         <?php foreach ($users as $user) : ?>
                             <tr>
@@ -58,17 +58,17 @@
                                 <td>
                                     <select class="form-select role-select" id="role_id" name="role_id" data-id="<?= $user['id'] ?>">
                                         <?php foreach ($roles as $role) : ?>
-                                            <option <?= selected_option($role['role'], $user['role']) ?> value="<?= $role['id'] ?>">
+                                            <option <?= selected_option($role['id'], $user['role_id']) ?> value="<?= $role['id'] ?>">
                                                 <?= $role['role'] ?>
                                             </option>
                                         <?php endforeach ?>
                                     </select>
                                 </td>
                                 <td>
-                                <input class="form-check-input" type="checkbox" value="1" <?= ($user['is_active'] == 1) ? 'checked' : ''  ?> data-id="<?= $user['id'] ?>">
+                                    <input class="form-check-input" type="checkbox" value="1" <?= ($user['is_active'] == 1) ? 'checked' : ''  ?> data-id="<?= $user['id'] ?>">
                                 </td>
-                                <td class="d-none d-xl-table-cell"><?= time_parsing($user['created_at']) ?></td>
-                                <td class="d-none d-xl-table-cell"><?= time_parsing($user['updated_at']) ?></td>
+                                <td class="d-none d-xl-table-cell"><?= $user['created_at'] ?></td>
+                                <td class="d-none d-xl-table-cell"><?= $user['updated_at'] ?></td>
                             </tr>
                         <?php endforeach ?>
                     </tbody>
@@ -83,8 +83,54 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
     
+    const searchForm = document.getElementById('search-form');
+
+    searchForm.addEventListener('submit', function(event){
+        event.preventDefault();
+
+        const keyword = document.getElementsByTagName('input')[0].value;
+
+        fetch('<?= base_url('admin/usermanagement') ?>?keyword=' + encodeURIComponent(keyword), {
+            method : 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            const tableBody = document.querySelector('#user-table tbody');
+            tableBody.innerHTML = '';
+            
+            let i = 1;
+
+            data['users'].forEach(user => {
+                let row = `<tr>
+                            <td>${i++}</td>
+                            <td>${user.name}</td>
+                            <td class="d-none d-xl-table-cell">${user.email}</td>
+                            <td>
+                                <select class="form-select role-select" id="role_id" name="role_id" data-id="${user.id}">
+                                    ${data["roles"].map(role => `
+                                        <option ${role.id == user.role_id ? 'selected' : ''} value="${role.id}">
+                                            ${role.role}
+                                        </option>
+                                    `).join('')}
+                                </select>
+                            </td>
+                            <td>
+                                <input class="form-check-input" type="checkbox" value="1" ${user.is_active == 1 ? 'checked' : ''} data-id="${user.id}">
+                            </td>
+                            <td class="d-none d-xl-table-cell">${user.created_at}</td>
+                            <td class="d-none d-xl-table-cell">${user.updated_at}</td>
+                        </tr>
+                    `;
+                    tableBody.insertAdjacentHTML('beforeend', row);
+            });
+        });
+    });
+
     $('#max-rows').val(<?= $maxRows ?>);
-    
+
     $('#max-rows').on('change', function() {
         const maxRows = $(this).val();
         const keyword = $('input[name="keyword"]').val();
@@ -96,11 +142,11 @@
                 maxRows: maxRows,
                 keyword: keyword
             },
-            
+
             success: function(response) {
                 window.location.reload();
             },
-            
+
         })
 
     })

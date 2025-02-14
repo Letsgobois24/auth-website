@@ -120,24 +120,49 @@ class Admin extends BaseController
     
     public function userManagement()
     {
-        $keyword = $this->request->getVar('keyword');
-        $maxRows = $this->request->getVar('maxRows');
-        
-        $maxRows = ($maxRows) ?: 2;
+        $maxRows = 10;
+        if ($this->request->isAJAX()) {
+            $keyword = $this->request->getGet('keyword');
+            $currentPage = $this->request->getVar('page_user') ?: 1;
+            $users = $this->userModel->getUsers($keyword, $maxRows);
+            
+            for ($i=0;$i<count($users);$i++){
+                $users[$i]['created_at'] = time_parsing($users[$i]['created_at']);
+                $users[$i]['updated_at'] = time_parsing($users[$i]['updated_at']);
+            }
 
+            $data = [
+                'roles' => $this->roleModel->findAll(),
+                'users' => $users,
+                'pager' => $this->userModel->pager,
+                'currentPage' => $currentPage
+            ];
+
+            return $this->response->setJSON($data);
+
+        }
+        
+        $keyword = $this->request->getGet('keyword');
         $currentPage = $this->request->getVar('page_user') ?: 1;
+        $users = $this->userModel->getUsers($keyword, $maxRows);
+
+        for ($i=0;$i<count($users);$i++){
+            $users[$i]['created_at'] = time_parsing($users[$i]['created_at']);
+            $users[$i]['updated_at'] = time_parsing($users[$i]['updated_at']);
+        }
 
         $data = [
             'title' => 'User',
             'menu' => $this->menu,
             'user' => $this->dataUser,
             'roles' => $this->roleModel->findAll(),
-            'users' => $this->userModel->getUsers($keyword, $maxRows),
+            'users' => $users,
             'maxRows' => $maxRows,
             'keyword' => ($keyword) ?: '',
             'pager' => $this->userModel->pager,
             'currentPage' => $currentPage
         ];
+
         return view('admin/usermanagement', $data);
     }
     
@@ -168,13 +193,4 @@ class Admin extends BaseController
         self::flash('warning', 'User activation has been changed');
     }
 
-    public function coba (){
-        $keyword = $this->request->getPost('keyword');
-        $maxRows = $this->request->getPost('max-rows');
-        $kata = $this->request->getPost('asu');
-
-        d($kata);
-        d($keyword);
-        d($maxRows);
-    }
 }
