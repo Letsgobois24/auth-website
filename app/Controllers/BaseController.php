@@ -58,6 +58,6 @@ abstract class BaseController extends Controller
 
     public static function flash($type, $message)
     {
-         session()->setFlashdata('message','<div class="alert alert-'. $type .' mt-2" role="alert">'.$message.'</div>');
+        session()->setFlashdata('message', '<div class="alert alert-' . $type . ' mt-2" role="alert">' . $message . '</div>');
     }
 }

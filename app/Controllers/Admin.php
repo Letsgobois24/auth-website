@@ -166,31 +166,15 @@ class Admin extends BaseController
         return view('admin/usermanagement', $data);
     }
     
-    public function changeActivation()
+    public function changeUserData()
     {
-        $id = $this->request->getVar('id');
-        $checked = $this->request->getVar('checked');
-
-        $data = [
-            'id' => $id,
-            'is_active' => ($checked == 'true') ? 1 : 0
-        ];
-
-        $this->userModel->save($data);
-
-        self::flash('warning', 'User activation has been changed');
-    }
-    
-    public function changeRole()
-    {
-        $data = [
-            'id' => $this->request->getVar('id'),
-            'role_id' => $this->request->getVar('role_id')
-        ];
+        $id =  $this->request->getVar('id');
         
-        $this->userModel->save($data);
-        
-        self::flash('warning', 'User activation has been changed');
+        $this->userModel->save($this->request->getVar());
+
+        $data = $this->userModel->select('updated_at')->find($id);
+        $data['updated_at'] = time_parsing($data['updated_at']);
+        return $this->response->setJSON($data);
     }
 
 }

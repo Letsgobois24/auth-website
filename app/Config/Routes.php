@@ -25,8 +25,7 @@ $routes->group('/admin', static function ($routes){
     $routes->add('changeaccess', 'Admin::changeaccess');
     $routes->delete('deleteRole/(:num)', 'Admin::deleteRole/$1');
     $routes->match(['GET', 'POST'],'usermanagement', 'Admin::usermanagement');
-    $routes->post('changeactivation', 'Admin::changeactivation');
-    $routes->post('changerole', 'Admin::changerole');
+    $routes->post('changeuserdata', 'Admin::changeuserdata');
     $routes->match(['GET', 'POST'],'coba', 'Admin::coba');
 });
 

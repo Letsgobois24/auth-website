@@ -7,7 +7,7 @@
 
         <h1 class="h3 mb-3">User Management</h1>
 
-        <?= session()->getFlashdata('message') ?: '' ?>
+        <div class="alert alert-warning mt-2" role="alert" style="display: none;"></div>
 
         <div class="row mb-3">
             <div class="col-12 col-sm-6">
@@ -65,15 +65,17 @@
                                     </select>
                                 </td>
                                 <td>
-                                    <input class="form-check-input" type="checkbox" value="1" <?= ($user['is_active'] == 1) ? 'checked' : ''  ?> data-id="<?= $user['id'] ?>">
+                                    <input class="form-check-input user-activation" type="checkbox" value="1" <?= ($user['is_active'] == 1) ? 'checked' : ''  ?> data-id="<?= $user['id'] ?>">
                                 </td>
                                 <td class="d-none d-xl-table-cell"><?= $user['created_at'] ?></td>
-                                <td class="d-none d-xl-table-cell"><?= $user['updated_at'] ?></td>
+                                <td class="d-none d-xl-table-cell updated-at"><?= $user['updated_at'] ?></td>
                             </tr>
                         <?php endforeach ?>
                     </tbody>
                 </table>
-                <?= $pager->links('user', 'user_pagination') ?>
+                <div class="pagination-links">
+                    <?= $pager->links('user', 'user_pagination') ?>
+                </div>
             </div>
         </div>
 
@@ -82,29 +84,31 @@
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-    
     const searchForm = document.getElementById('search-form');
+    const tableBody = document.querySelector('#user-table tbody');
 
-    searchForm.addEventListener('submit', function(event){
+    searchForm.addEventListener('submit', function(event) {
         event.preventDefault();
 
         const keyword = document.getElementsByTagName('input')[0].value;
 
-        fetch('<?= base_url('admin/usermanagement') ?>?keyword=' + encodeURIComponent(keyword), {
-            method : 'GET',
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest'
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            const tableBody = document.querySelector('#user-table tbody');
-            tableBody.innerHTML = '';
-            
-            let i = 1;
+        let url = new URL(window.location.href);
+        url.searchParams.set('keyword', keyword);
 
-            data['users'].forEach(user => {
-                let row = `<tr>
+        fetch(url.toString(), {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                tableBody.innerHTML = '';
+
+                let i = 1;
+
+                data['users'].forEach(user => {
+                    let row = `<tr>
                             <td>${i++}</td>
                             <td>${user.name}</td>
                             <td class="d-none d-xl-table-cell">${user.email}</td>
@@ -118,15 +122,83 @@
                                 </select>
                             </td>
                             <td>
-                                <input class="form-check-input" type="checkbox" value="1" ${user.is_active == 1 ? 'checked' : ''} data-id="${user.id}">
+                                <input class="form-check-input user-activation" type="checkbox" value="1" ${user.is_active == 1 ? 'checked' : ''} data-id="${user.id}">
                             </td>
                             <td class="d-none d-xl-table-cell">${user.created_at}</td>
-                            <td class="d-none d-xl-table-cell">${user.updated_at}</td>
+                            <td class="d-none d-xl-table-cell updated-at">${user.updated_at}</td>
                         </tr>
                     `;
                     tableBody.insertAdjacentHTML('beforeend', row);
+                });
+
+
             });
-        });
+    });
+
+    const alert = document.querySelector('[role="alert"]');
+
+    tableBody.addEventListener('change', function(event) {
+        // Change Role
+        if (event.target.classList.contains('role-select')) {
+            const role_id = event.target.value;
+            const id = event.target.dataset.id;
+
+            const parentRow = event.target.closest('tr');
+            const updated_at = parentRow.querySelector('.updated-at');
+
+            fetch('<?= base_url('admin/changeuserdata') ?>', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify({
+                        id: id,
+                        role_id: role_id
+                    })
+                })
+                .then(response => response.json())
+                .then((data) => {
+                    updated_at.innerHTML = data['updated_at'];
+                    alert.style.display = 'block';
+                    alert.innerHTML = 'User role has been changed';
+                    setTimeout(() => {
+                        alert.style.display = 'none';
+                    }, 1200);
+                })
+        }
+
+        // Change Activation
+        if (event.target.classList.contains('user-activation')) {
+            const is_active = event.target.checked ? 1 : 0;
+            const id = event.target.dataset.id;
+
+            const parentRow = event.target.closest('tr');
+            const updated_at = parentRow.querySelector('.updated-at');
+
+            fetch('<?= base_url('admin/changeuserdata') ?>', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify({
+                        id: id,
+                        is_active: is_active
+                    })
+                })
+                .then(response => response.json())
+                .then((data) => {
+                    updated_at.innerHTML = data['updated_at'];
+                    alert.style.display = 'block';
+                    alert.innerHTML = 'User activation has been changed';
+                    setTimeout(() => {
+                        alert.style.display = 'none';
+                    }, 1200);
+                })
+        }
+
+
     });
 
     $('#max-rows').val(<?= $maxRows ?>);
@@ -150,42 +222,6 @@
         })
 
     })
-
-    $('.form-check-input').on('change', function() {
-        const id = $(this).data('id');
-        const checked = $(this).is(':checked');
-
-        $.ajax({
-            url: "<?= base_url('admin/changeactivation') ?>",
-            type: "post",
-            data: {
-                id: id,
-                checked: checked
-            },
-            success: function() {
-                window.location.reload();
-            }
-        })
-    })
-
-    $('.role-select').on('change', function() {
-        const selectedOption = $(this).val();
-        const id = $(this).data('id');
-
-        if (selectedOption) {
-            $.ajax({
-                url: "<?= base_url('admin/changerole') ?>",
-                type: "post",
-                data: {
-                    id: id,
-                    role_id: selectedOption
-                },
-                success: function() {
-                    window.location.reload();
-                }
-            });
-        }
-    });
 </script>
 
 <?= $this->endSection() ?>
