@@ -23,47 +23,59 @@
 
 <body>
 
-<?= $this->include('layout/navbar') ?>
-<?= $this->renderSection('content') ?>
-<?= $this->include('layout/footer') ?>
+	<?= $this->include('layout/navbar') ?>
+	<?= $this->renderSection('content') ?>
+	<?= $this->include('layout/footer') ?>
 
-<!-- <script>
-	document.addEventListener('DOMContentLoaded', function () {
-		const sidebarLink = document.querySelectorAll('a.sidebar-link');
-		sidebarLink.forEach(function(link){
-			link.addEventListener('click', function(event){
-				
-				const url = link.href;
-				event.preventDefault();
+	<!-- <script>
+		document.addEventListener('DOMContentLoaded', function() {
+			const sidebarLink = document.querySelectorAll('a.sidebar-link');
+			sidebarLink.forEach(function(link) {
+				link.addEventListener('click', function(event) {
 
-				const containerLink = link.parentElement;
+					const url = link.href;
+					event.preventDefault();
 
-				const sidebar = document.getElementById('sidebar');
-				const activeContainerLink = sidebar.querySelector('.active');
+					const containerLink = link.parentElement;
 
-				activeContainerLink.classList.remove('active');
-				containerLink.classList.add('active');
+					const sidebar = document.getElementById('sidebar');
+					const activeContainerLink = sidebar.querySelector('.active');
 
-				fetch(url, {
-					headers: {
-						'X-Requested-With': 'XMLHttpRequest'
-					}
+					activeContainerLink.classList.remove('active');
+					containerLink.classList.add('active');
+
+					fetch(url, {
+							headers: {
+								'X-Requested-With': 'XMLHttpRequest'
+							}
+						})
+						.then(response => response.text())
+						.then(data => {
+							const parser = new DOMParser();
+							const doc = parser.parseFromString(data, 'text/html');
+							const mainContent = doc.querySelector('main').innerHTML;
+
+							document.querySelector('main').innerHTML = mainContent;
+							const scripts = doc.querySelectorAll('script');
+
+							scripts.forEach(oldScript => {
+								const newScript = document.createElement('script');
+								if (oldScript.src) {
+									newScript.src = oldScript.src;
+								} else {
+									newScript.textContent = oldScript.textContent;
+								}
+								document.body.appendChild(newScript);
+								// // Hapus script lama jika perlu
+								// oldScript.parentNode.removeChild(oldScript);
+							});
+						})
+						.catch(error => console.log(error))
 				})
-				.then(response => response.text())
-				.then(data => {
-					const parser = new DOMParser();
-					const doc = parser.parseFromString(data, 'text/html');
-					const mainContent = doc.querySelector('main').innerHTML;
-					
-					document.querySelector('main').innerHTML = mainContent;
-				})
-				.catch(error => console.log(error))
 			})
 		})
-	})
-</script>
-
-<script src="<?= base_url() ?>js/admin/usermanagement.js"></script> -->
+	</script> -->
 
 </body>
+
 </html>
