@@ -139,9 +139,9 @@ class Admin extends BaseController
                 'currentPage' => $currentPage,
             ];
 
-        // if($this->request->isAJAX()){
-        //     return $this->response->setJSON($data);
-        // }
+        if($this->request->isAJAX()){
+            return $this->response->setJSON($data);
+        }
 
         $data['title'] = 'User';
         $data['menu'] = $this->menu;

@@ -27,7 +27,7 @@
 <?= $this->renderSection('content') ?>
 <?= $this->include('layout/footer') ?>
 
-<script>
+<!-- <script>
 	document.addEventListener('DOMContentLoaded', function () {
 		const sidebarLink = document.querySelectorAll('a.sidebar-link');
 		sidebarLink.forEach(function(link){
@@ -63,7 +63,7 @@
 	})
 </script>
 
-<script src="<?= base_url() ?>js/admin/usermanagement.js"></script>
+<script src="<?= base_url() ?>js/admin/usermanagement.js"></script> -->
 
 </body>
 </html>

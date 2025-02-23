@@ -2,8 +2,6 @@ const searchForm = document.getElementById('search-form');
 const tableBody = document.querySelector('#user-table tbody');
 const maxRowsSelect = document.getElementById('max-rows');
 
-console.log('ok');
-
 searchForm.addEventListener('submit', function (event) {
     event.preventDefault();
     const maxRows = maxRowsSelect.value;
