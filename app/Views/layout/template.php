@@ -27,5 +27,43 @@
 <?= $this->renderSection('content') ?>
 <?= $this->include('layout/footer') ?>
 
+<script>
+	document.addEventListener('DOMContentLoaded', function () {
+		const sidebarLink = document.querySelectorAll('a.sidebar-link');
+		sidebarLink.forEach(function(link){
+			link.addEventListener('click', function(event){
+				
+				const url = link.href;
+				event.preventDefault();
+
+				const containerLink = link.parentElement;
+
+				const sidebar = document.getElementById('sidebar');
+				const activeContainerLink = sidebar.querySelector('.active');
+
+				activeContainerLink.classList.remove('active');
+				containerLink.classList.add('active');
+
+				fetch(url, {
+					headers: {
+						'X-Requested-With': 'XMLHttpRequest'
+					}
+				})
+				.then(response => response.text())
+				.then(data => {
+					const parser = new DOMParser();
+					const doc = parser.parseFromString(data, 'text/html');
+					const mainContent = doc.querySelector('main').innerHTML;
+					
+					document.querySelector('main').innerHTML = mainContent;
+				})
+				.catch(error => console.log(error))
+			})
+		})
+	})
+</script>
+
+<script src="<?= base_url() ?>js/admin/usermanagement.js"></script>
+
 </body>
 </html>
