@@ -161,7 +161,6 @@ class Auth extends BaseController
             return $emailService->printDebugger();
             die;
         }
-
     }
     
     public function verify()

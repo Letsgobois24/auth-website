@@ -34,7 +34,7 @@ class UserModel extends Model
                     ->first();
     }
 
-    public function getUsers($keyword='', $maxRows)
+    public function getUsers($keyword='', $maxRows = 10)
     {
         $joinTable = $this->select('user.id, name, email, image, role, role_id, is_active, created_at, updated_at')
                             ->join('user_role', 'user_role.id=user.role_id');

@@ -27,10 +27,12 @@ class Admin extends BaseController
     
     public function index()
     {
+        
         $data['user'] = $this->dataUser;
         $data['title'] = 'Dashboard';
-
+        
         $data['menu'] = $this->menu;
+
         return view('admin/index',$data);
     }
 
@@ -67,6 +69,7 @@ class Admin extends BaseController
         
         $data['roles'] = $this->menuModel->getAll('user_role');
         $data['menu'] = $menu;
+
         return view('admin/role',$data);
     }
 
@@ -78,7 +81,6 @@ class Admin extends BaseController
         self::flash('success', $role['role'] . ' role has been deleted');
 
         return redirect()->back();
-
     }
 
     public function roleaccess($role_id)
@@ -119,30 +121,9 @@ class Admin extends BaseController
     }
     
     public function userManagement()
-    {
-        $maxRows = 10;
-        if ($this->request->isAJAX()) {
-            $keyword = $this->request->getGet('keyword');
-            $currentPage = $this->request->getVar('page_user') ?: 1;
-            $users = $this->userModel->getUsers($keyword, $maxRows);
-            
-            for ($i=0;$i<count($users);$i++){
-                $users[$i]['created_at'] = time_parsing($users[$i]['created_at']);
-                $users[$i]['updated_at'] = time_parsing($users[$i]['updated_at']);
-            }
-
-            $data = [
-                'roles' => $this->roleModel->findAll(),
-                'users' => $users,
-                'pager' => $this->userModel->pager,
-                'currentPage' => $currentPage
-            ];
-
-            return $this->response->setJSON($data);
-
-        }
-        
-        $keyword = $this->request->getGet('keyword');
+    {        
+        $keyword = $this->request->getVar('keyword') ?: '';
+        $maxRows = $this->request->getVar('maxrows') ?: 2;
         $currentPage = $this->request->getVar('page_user') ?: 1;
         $users = $this->userModel->getUsers($keyword, $maxRows);
 
@@ -152,16 +133,20 @@ class Admin extends BaseController
         }
 
         $data = [
-            'title' => 'User',
-            'menu' => $this->menu,
-            'user' => $this->dataUser,
-            'roles' => $this->roleModel->findAll(),
-            'users' => $users,
-            'maxRows' => $maxRows,
-            'keyword' => ($keyword) ?: '',
-            'pager' => $this->userModel->pager,
-            'currentPage' => $currentPage
-        ];
+                'roles' => $this->roleModel->findAll(),
+                'users' => $users,
+                'pager' => $this->userModel->pager->links('user', 'user_pagination'),
+                'currentPage' => $currentPage,
+            ];
+
+        // if($this->request->isAJAX()){
+        //     return $this->response->setJSON($data);
+        // }
+
+        $data['title'] = 'User';
+        $data['menu'] = $this->menu;
+        $data['users'] = $users;
+        $data['user'] = $this->dataUser;
 
         return view('admin/usermanagement', $data);
     }

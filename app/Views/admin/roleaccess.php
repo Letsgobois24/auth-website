@@ -10,7 +10,7 @@
         <h5 class="h5 mb-3">Role : <?= $role['role'] ?></h5>
 
         <?= session()->getFlashdata('message') ?: '' ?>
-        
+
         <div class="row">
             <div class="col-12">
                 <div class="card flex-fill">
@@ -43,24 +43,29 @@
     </div>
 </main>
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-    $('.form-check-input').on('click', function(){
-		const menuId = $(this).data('menu');
-		const roleId = $(this).data('role');
-
-		$.ajax({
-			url: "<?= base_url('admin/changeaccess') ?>",
-			type: "post",
-			data: {
-				menuId: menuId,
-				roleId: roleId
-			},
-			success: function(){
-				document.location.href = "<?= base_url('admin/roleaccess/') ?>" + roleId
-			}
-		})
-	})
+    const checkInputs = document.querySelectorAll('.form-check-input');
+    checkInputs.forEach(checkInput => {
+        checkInput.addEventListener('click', function(){
+            const menuId = this.dataset.menu;
+            const roleId = this.dataset.role;
+    
+            fetch('<?= base_url('admin/changeaccess') ?>', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({
+                    menuId: menuId,
+                    roleId: roleId
+                })
+            })
+            .then(() => location.reload())
+            .catch(error => console.log(error))
+        })
+    });
+    
 </script>
 
 <?php $this->endSection() ?>
