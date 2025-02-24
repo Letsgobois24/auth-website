@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use CodeIgniter\Model;
+use CodeIgniter\I18n\Time;
 
 class UserModel extends Model
 {
@@ -34,16 +35,23 @@ class UserModel extends Model
                     ->first();
     }
 
-    public function getUsers($keyword='', $maxRows = 10)
+    public function getUsers($keyword='', $maxRows = 10, $pager = 1)
     {
-        $joinTable = $this->select('user.id, name, email, image, role, role_id, is_active, created_at, updated_at')
+        $result = $this->select('user.id, name, email, image, role, role_id, is_active, created_at, updated_at')
                             ->join('user_role', 'user_role.id=user.role_id');
         if ($keyword){
-            $joinTable = $joinTable
+            $result = $result
                         ->like('name', "%$keyword%")
                         ->orLike('email', "%$keyword%");
         }
 
-        return $joinTable->paginate($maxRows, 'user');
+        $result = $result->paginate($maxRows, 'user', $pager);
+
+        for ($i=0;$i<count($result);$i++){
+            $result[$i]['created_at'] = time_parsing($result[$i]['created_at']);
+            $result[$i]['updated_at'] = time_parsing($result[$i]['updated_at']);
+        }
+
+        return $result;
     }
 }

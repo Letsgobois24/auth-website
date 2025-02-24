@@ -124,19 +124,16 @@ class Admin extends BaseController
     {        
         $keyword = $this->request->getVar('keyword') ?: '';
         $maxRows = $this->request->getVar('maxrows') ?: 2;
-        $currentPage = $this->request->getVar('page_user') ?: 1;
-        $users = $this->userModel->getUsers($keyword, $maxRows);
+        $pager = $this->request->getVar('page_user') ?: 1;
 
-        for ($i=0;$i<count($users);$i++){
-            $users[$i]['created_at'] = time_parsing($users[$i]['created_at']);
-            $users[$i]['updated_at'] = time_parsing($users[$i]['updated_at']);
-        }
+        $users = $this->userModel->getUsers($keyword, $maxRows, $pager);
 
         $data = [
                 'roles' => $this->roleModel->findAll(),
                 'users' => $users,
                 'pager' => $this->userModel->pager->links('user', 'user_pagination'),
-                'currentPage' => $currentPage,
+                'currentPage' => $pager,
+                'maxRows' => $maxRows
             ];
 
         if($this->request->isAJAX()){
